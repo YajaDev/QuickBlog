@@ -1,1 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
+
 @import "tailwindcss";
+
+@theme {
+  --color-white: var(--white);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+}
+
+:root {
+  --background: #fff;
+  --foreground: #15151a;
+  --primary: #5044e5;
+  --primary-foreground: #f9f9f9;
+}
+
+@layer base {
+  html {
+    font-family: "outfit", sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  h1 {
+    @apply text-3xl font-bold
+  }
+
+  button {
+    @apply cursor-pointer transition-all duration-200
+  }
+}

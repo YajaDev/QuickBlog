@@ -5,19 +5,21 @@ import {
   Route,
 } from "react-router-dom";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Notfound from "./pages/Notfound";
+import UserForm from "./pages/UserForm";
+import RootLayout from "./layout/RootLayout";
 
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
-        <Route path="/" element={<Home />} />
-        <Route path="dashboard" element={<Dashboard />} />
         <Route path="register" element={<Register />} />
-        <Route path="login" element={<Login />} />
+        <Route path="/" element={<RootLayout />}>
+          <Route index element={<Home />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="auth" element={<UserForm />} />
+        </Route>
 
         <Route path="*" element={<Notfound />} />
       </>

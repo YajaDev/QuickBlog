@@ -53,7 +53,7 @@ const UserForm = () => {
         );
       }
 
-      navigate("/dashboard"); // redirect
+      navigate("/dashboard",{replace: true}); // redirect
       setEmail("");
       setPassword("");
     } catch (err) {

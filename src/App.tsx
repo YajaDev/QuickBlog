@@ -10,7 +10,7 @@ import UserForm from "./pages/UserForm";
 import BlogList from "./pages/BlogList";
 import AddBlog from "./pages/AddBlog";
 import RootLayout from "./layouts/RootLayout";
-import RootDashboard from "./layouts/DashboardLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
 
 function App() {
   const router = createBrowserRouter(
@@ -19,7 +19,9 @@ function App() {
         <Route path="/" element={<RootLayout />}>
           <Route index element={<Home />} />
           <Route path="auth" element={<UserForm />} />
-          <Route path="dashboard" element={<RootDashboard />}>
+
+          {/* Protected Route */}
+          <Route path="dashboard" element={<DashboardLayout />}>
             <Route index element={<BlogList />} />
             <Route path="addBlog" element={<AddBlog />} />
           </Route>

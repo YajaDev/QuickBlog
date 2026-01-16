@@ -11,29 +11,25 @@ type Step = "Login" | "Register";
 
 const UserForm = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error: reduxError } = useSelector(
+  const { loading } = useSelector(
     (state: RootState) => state.auth
   );
 
   const [step, setStep] = useState<Step>("Login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [localError, setLocalError] = useState(""); // for monitoring the input
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Check if email and password is not Empty
-    if (!email || !password) {
-      setLocalError("All fields are required");
-      return;
-    }
-
     dispatch(startAuth()); // Make loading state to true
 
     try {
+      // Check if email and password is not Empty
+      if (!email || !password) throw new Error("All fields are required");
+
       if (step === "Login") {
         // LOGIN Authentication
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -58,19 +54,19 @@ const UserForm = () => {
       }
 
       navigate("/dashboard"); // redirect
+      setEmail("");
+      setPassword("");
     } catch (err) {
       if (err instanceof Error) {
         dispatch(authError(err.message));
-
-        if (!localError || !reduxError)
-          dispatch(setNotification({ status: "error", message: err.message })); // trigger error notification
+        dispatch(setNotification({ status: "error", message: err.message })); // trigger error notification
       } else {
         dispatch(authError("Unexpected Error!"));
+        dispatch(
+          setNotification({ status: "error", message: "Unexpected Error!" })
+        );
       }
     }
-
-    setEmail("");
-    setPassword("");
   };
 
   return (

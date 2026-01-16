@@ -5,10 +5,12 @@ import {
   Route,
 } from "react-router-dom";
 import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
 import Notfound from "./pages/Notfound";
 import UserForm from "./pages/UserForm";
-import RootLayout from "./layout/RootLayout";
+import BlogList from "./pages/BlogList";
+import AddBlog from "./pages/AddBlog";
+import RootLayout from "./layouts/RootLayout";
+import RootDashboard from "./layouts/DashboardLayout";
 
 function App() {
   const router = createBrowserRouter(
@@ -16,8 +18,11 @@ function App() {
       <>
         <Route path="/" element={<RootLayout />}>
           <Route index element={<Home />} />
-          <Route path="dashboard" element={<Dashboard />} />
           <Route path="auth" element={<UserForm />} />
+          <Route path="dashboard" element={<RootDashboard />}>
+            <Route index element={<BlogList />} />
+            <Route path="addBlog" element={<AddBlog />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<Notfound />} />

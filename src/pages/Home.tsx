@@ -1,11 +1,14 @@
-import React from 'react'
+import Header, { type RedirectBtn } from "../components/Header";
 
-type Props = {}
+const Home = () => {
+  const redirectBtn: RedirectBtn = { name: "Dashboard", to: "dashboard" };
 
-const Home = (props: Props) => {
   return (
-    <div>Home</div>
-  )
-}
+    <div className="min-h-screen mx-8 md:mx-20 xl:mx-32">
+      <Header redirectBtn={redirectBtn} />
+      <div>Home</div>
+    </div>
+  );
+};
 
-export default Home
+export default Home;

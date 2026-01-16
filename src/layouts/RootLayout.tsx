@@ -4,7 +4,7 @@ import Notification from "../components/Notification";
 const RootLayout = () => {
   return (
     <>
-      <Notification/>
+      <Notification />
       <Outlet />
     </>
   );

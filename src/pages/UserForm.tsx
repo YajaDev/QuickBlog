@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../services/supabase";
+import { supabase } from "../services/supabaseService";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../reduxStore/store";
 import { setNotification } from "../reduxStore/notificationSlice";

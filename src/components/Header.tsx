@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { clearSession } from "../reduxStore/authSlice";
-import { supabase } from "../services/supabase";
+import { supabase } from "../services/supabaseService";
 
 export type TypeOfButton = "dashboard" | "auth" | "home" | "logout";
 

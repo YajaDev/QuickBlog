@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../reduxStore/store";
-
-import { authError, authSuccess, startAuth } from "../reduxStore/authSlice";
+import { supabase } from "../services/supabase";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../reduxStore/store";
 import { setNotification } from "../reduxStore/notificationSlice";
 import { useNavigate } from "react-router-dom";
 
@@ -11,20 +9,16 @@ type Step = "Login" | "Register";
 
 const UserForm = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const navigate = useNavigate();
 
   const [step, setStep] = useState<Step>("Login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    dispatch(startAuth()); // Make loading state to true
+    setLoading(true);
 
     try {
       // Check if email and password is not Empty
@@ -32,19 +26,15 @@ const UserForm = () => {
 
       if (step === "Login") {
         // LOGIN Authentication
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (error) throw error; // check if there's an error
-        dispatch(authSuccess(data.session)); // update session state
-        console.log(data);
       } else {
         // REGISTER Authentication
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        if (!data.session) throw Error("No user returned"); // check if session is autenticated
-        dispatch(authSuccess(data.session));
         dispatch(
           setNotification({
             status: "success",
@@ -53,19 +43,18 @@ const UserForm = () => {
         );
       }
 
-      navigate("/dashboard",{replace: true}); // redirect
+      navigate("/dashboard", { replace: true }); // redirect
       setEmail("");
       setPassword("");
     } catch (err) {
-      if (err instanceof Error) {
-        dispatch(authError(err.message));
-        dispatch(setNotification({ status: "error", message: err.message })); // trigger error notification
-      } else {
-        dispatch(authError("Unexpected Error!"));
-        dispatch(
-          setNotification({ status: "error", message: "Unexpected Error!" })
-        );
-      }
+      const message = err instanceof Error ? err.message : "Unexpected error";
+
+      dispatch(
+        setNotification({
+          status: "error",
+          message,
+        })
+      );
     }
   };
 

@@ -11,8 +11,31 @@ import BlogList from "./pages/BlogList";
 import AddBlog from "./pages/AddBlog";
 import RootLayout from "./layouts/RootLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { fetchUser } from "./services/blog";
+import type { AppDispatch } from "./reduxStore/store";
+import { supabase } from "./services/supabase";
+import { setSession } from "./reduxStore/authSlice";
 
 function App() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    fetchUser(dispatch);
+
+    // Listen to auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        dispatch(setSession(session));
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, [dispatch]);
+
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
@@ -23,7 +46,7 @@ function App() {
           {/* Protected Route */}
           <Route path="dashboard" element={<DashboardLayout />}>
             <Route index element={<BlogList />} />
-            <Route path="addBlog" element={<AddBlog />} />
+            <Route path="addblog" element={<AddBlog />} />
           </Route>
         </Route>
 

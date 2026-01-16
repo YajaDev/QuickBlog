@@ -1,8 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { clearsession } from "../reduxStore/authSlice";
-import { supabase } from "../lib/supabase";
+import { clearSession } from "../reduxStore/authSlice";
+import { supabase } from "../services/supabase";
 
 export type TypeOfButton = "dashboard" | "auth" | "home" | "logout";
 
@@ -28,17 +28,17 @@ const Header = ({ typeOfButton, withBorder }: Props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const headerBtn = buttons.find((btn) => btn.type === typeOfButton) || buttons[0];
+  const headerBtn = buttons.find((btn) => btn.type === typeOfButton);
 
   const handleButton = async () => {
     if (typeOfButton === "logout") {
       await supabase.auth.signOut();
       navigate("/", { replace: true });
-      dispatch(clearsession());
+      dispatch(clearSession());
       return;
     }
 
-    navigate(headerBtn.path);
+    if (headerBtn) navigate(headerBtn.path);
   };
 
   return (
@@ -53,13 +53,15 @@ const Header = ({ typeOfButton, withBorder }: Props) => {
         </h1>
       </NavLink>
 
-      <button
-        onClick={handleButton}
-        className="flex items-center bg-primary text-primary-foreground text-sm px-4 py-2 rounded-full capitalize"
-      >
-        {headerBtn.label}
-        <ArrowRight className="ml-1 size-4" />
-      </button>
+      {headerBtn && (
+        <button
+          onClick={handleButton}
+          className="flex items-center bg-primary text-primary-foreground text-sm px-4 py-2 rounded-full capitalize"
+        >
+          {headerBtn.label}
+          <ArrowRight className="ml-1 size-4" />
+        </button>
+      )}
     </header>
   );
 };

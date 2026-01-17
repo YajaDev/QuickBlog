@@ -1,18 +1,101 @@
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Header, { type TypeOfButton } from "../components/Header";
 import type { RootState } from "../reduxStore/store";
+import { getBlogs } from "../services/blogServices";
+import { setPages, setTotalPage } from "../reduxStore/blogSlice";
+import { setNotification } from "../reduxStore/notificationSlice";
+import Pagination from "../components/Pagination";
+import { LoaderCircle } from "lucide-react";
 
 const Home = () => {
-  const { session } = useSelector((state: RootState) => state.auth);
+  const blogsPerPage = 6;
 
-  const typeOfButton: TypeOfButton = session
-    ? "dashboard" // props if user is authenticated
-    : "auth"; // if not
+  const { session } = useSelector((state: RootState) => state.auth);
+  const { pages, totalPage } = useSelector((state: RootState) => state.blog);
+
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const typeOfButton: TypeOfButton = session ? "dashboard" : "auth";
+
+  const currentPageData = pages[currentPage];
+  const blogs = currentPageData?.blogs || [];
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      const from = (currentPage - 1) * blogsPerPage;
+      const to = from + blogsPerPage - 1;
+
+      setIsLoading(true);
+
+      try {
+        const { blogs, pageCount } = await getBlogs(from, to, blogsPerPage);
+
+        dispatch(setTotalPage(pageCount));
+        dispatch(setPages({ page: currentPage, blogs }));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unexpected error";
+        dispatch(setNotification({ status: "error", message }));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, [currentPage, dispatch]);
 
   return (
-    <div className="min-h-screen mx-8 md:mx-20 xl:mx-32">
+    <div className="mx-8 md:mx-20 xl:mx-32 space-y-6">
       <Header typeOfButton={typeOfButton} />
-      <div>Home</div>
+      <div className="text-center my-10 space-y-6">
+        <h1 className="text-3xl sm:text-6xl font-semibold">
+          Your own <span className="text-primary">blogging</span> platform.
+        </h1>
+        <p className="my-6 sm:my-8 max-w-2xl m-auto max-sm:text-xs text-gray-500">
+          This is your space to think out loud, to share what matters, and to
+          write without filters. Whether it's one word or a thousand, your story
+          starts right here.
+        </p>
+      </div>
+
+      <div className="-full">
+        {/* Loading */}
+        {isLoading && (
+          <div className="flex flex-col justify-center items-center h-60">
+            <LoaderCircle className="text-primary animate-spin size-10" />
+            <span className="text-gray-600">loading...</span>
+          </div>
+        )}
+
+        {/* Display blogs */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+          {!isLoading &&
+            blogs &&
+            blogs.map(({ id, img_url, title, subTitle }) => (
+              <div
+                key={id}
+                className="w-full rounded-lg overflow-hidden shadow hover:scale-102 hover:shadow-primary/25 duration-300 cursor-pointer"
+              >
+                {img_url && (
+                  <img src={img_url} alt={title} className="aspect-video" />
+                )}
+
+                <div className="pl-5">
+                  <h5 className="mb-2 font-medium text-gray-900">{title}</h5>
+                  <p className="mb-3 text-xs text-gray-600">{subTitle}</p>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      <Pagination
+        setCurrentPage={setCurrentPage}
+        currentPage={currentPage}
+        totalPage={totalPage}
+      />
     </div>
   );
 };

@@ -3,7 +3,6 @@
 @import "tailwindcss";
 
 @theme {
-  --color-white: var(--white);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
@@ -12,7 +11,7 @@
 
 :root {
   --background: #fff;
-  --foreground: #15151a;
+  --foreground: #364153;
   --primary: #5044e5;
   --primary-foreground: #f9f9f9;
 }
@@ -27,10 +26,22 @@
   }
 
   h1 {
-    @apply text-3xl font-bold
+    @apply text-3xl font-bold;
   }
 
   button {
-    @apply cursor-pointer transition-all duration-200
+    @apply cursor-pointer transition-all duration-200;
+  }
+
+  input, textarea {
+    @apply border-gray-300
+  }
+}
+
+@layer utilities {
+  .scroll-hidden {
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none; 
   }
 }

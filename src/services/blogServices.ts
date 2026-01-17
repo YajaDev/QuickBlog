@@ -1,24 +1,34 @@
 import { supabase } from "./supabaseService";
 
 export interface Blog {
-  id: string; // UUID of the blog
-  user_id: string; // UUID of the user who created it
-  title: string; // Main title
-  subTitle?: string; // Optional subtitle
-  description: string; // Blog content or description
-  img_url: string | null; // Image URL, nullable
-  created_at: string; // ISO date string
+  id: string;
+  user_id: string;
+  title: string;
+  subTitle?: string;
+  description: string;
+  img_url: string | null;
+  created_at: string;
 }
 
-export const getBlogs = async () => {
-  const { data, error } = await supabase
+export type NewBlog = Omit<Blog, "id" | "created_at">;
+
+export const getBlogs = async (
+  from: number,
+  to: number,
+  blogsPerPage: number
+) => {
+  const { data, count, error } = await supabase
     .from("blogs")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw error;
 
-  return data;
+  return {
+    blogs: data || [],
+    pageCount: Math.ceil((count || 0) / blogsPerPage),
+  };
 };
 
 export const getBlogsByUser = async (userId: string) => {
@@ -33,12 +43,20 @@ export const getBlogsByUser = async (userId: string) => {
   return data;
 };
 
+export const addBlog = async (blog: NewBlog) => {
+  const { data, error } = await supabase.from("blogs").insert(blog).single();
+
+  if (error) throw error;
+
+  return data;
+};
+
 export const editBlog = async ({
   blogId,
   updatedBlog,
 }: {
   blogId: string;
-  updatedBlog: Blog;
+  updatedBlog: Partial<Blog>;
 }) => {
   const { data, error } = await supabase
     .from("blogs")

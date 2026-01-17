@@ -4,6 +4,12 @@ import {
   RouterProvider,
   Route,
 } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import type { AppDispatch } from "./reduxStore/store";
+import { supabase } from "./services/supabaseService";
+import { setSession } from "./reduxStore/authSlice";
+
 import Home from "./pages/Home";
 import Notfound from "./pages/Notfound";
 import UserForm from "./pages/UserForm";
@@ -11,18 +17,16 @@ import BlogList from "./pages/BlogList";
 import AddBlog from "./pages/AddBlog";
 import RootLayout from "./layouts/RootLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
-import { useDispatch } from "react-redux";
-import { useEffect } from "react";
-import { fetchUser } from "./services/blog";
-import type { AppDispatch } from "./reduxStore/store";
-import { supabase } from "./services/supabase";
-import { setSession } from "./reduxStore/authSlice";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    fetchUser(dispatch);
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      dispatch(setSession(data.session));
+    };
+    fetchUser();
 
     // Listen to auth changes
     const { data: listener } = supabase.auth.onAuthStateChange(

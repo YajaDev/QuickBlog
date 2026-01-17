@@ -1,11 +1,226 @@
-import React from 'react'
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../reduxStore/store";
+import { useEffect, useState } from "react";
+import { addBlog, editBlog, type NewBlog } from "../services/blogServices";
+import uploadImg from "../assets/upload-img.svg";
+import { uploadBlogImage } from "../services/imageUploadService";
+import { setNotification } from "../reduxStore/notificationSlice";
+import { clearBlogToEdit } from "../reduxStore/blogSlice";
 
-type Props = {}
+const AddBlog = () => {
+  const { session } = useSelector((state: RootState) => state.auth);
+  const { blogToEdit } = useSelector((state: RootState) => state.blog);
+  const dispatch = useDispatch();
 
-const AddBlog = (props: Props) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [blogData, setBlogData] = useState<NewBlog>({
+    title: "",
+    subTitle: "",
+    description: "",
+    user_id: session?.user.id || "",
+    img_url: null,
+  });
+
+  useEffect(() => {
+    if (blogToEdit) {
+      setBlogData({
+        title: blogToEdit.title,
+        subTitle: blogToEdit.subTitle,
+        description: blogToEdit.description,
+        user_id: session?.user.id || "",
+        img_url: blogToEdit.img_url,
+      });
+
+      setPreviewUrl(blogToEdit.img_url); //Set preview URL to existing image
+    }
+  }, [blogToEdit, session?.user.id]);
+
+  useEffect(() => {
+    return () => {
+      setBlogData((state) => ({
+        title: "",
+        subTitle: "",
+        description: "",
+        user_id: state.user_id,
+        img_url: null,
+      }));
+      setPreviewUrl(null);
+      dispatch(clearBlogToEdit());
+    };
+  }, [dispatch]);
+
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+
+    // Create preview URL
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!session) return;
+
+    try {
+      setIsUploading(true);
+      const updatedBlogData = { ...blogData }; // local blog copy
+
+      if (selectedFile) {
+        const imgUrl = await uploadBlogImage(selectedFile, session.user.id); // Upload image
+        updatedBlogData.img_url = imgUrl; // Update blogData
+      }
+
+      if (blogToEdit) {
+        await editBlog({
+          blogId: blogToEdit.id,
+          updatedBlog: updatedBlogData,
+        });
+
+        dispatch(
+          setNotification({
+            status: "success",
+            message: "Blog updated successfully!",
+          })
+        );
+      } else {
+        await addBlog(updatedBlogData);
+        dispatch(
+          setNotification({
+            status: "success",
+            message: "Blog created successfully!",
+          })
+        );
+      }
+
+      // Reset form
+      setBlogData({
+        title: "",
+        subTitle: "",
+        description: "",
+        user_id: session.user.id,
+        img_url: null,
+      });
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      dispatch(clearBlogToEdit());
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unexpected error";
+      dispatch(setNotification({ status: "error", message }));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
-    <div>AddBlog</div>
-  )
-}
+    <div className="size-full bg-primary/3 overflow-y-scroll overflow-x-hidden scroll-hidden text-gray-600">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white w-full max-w-3xl p-4 md:p-10 sm:m-10 shadow rounded space-y-4"
+      >
+        <h2 className="text-2xl font-bold text-foreground/90">
+          {blogToEdit ? "Edit Blog" : "Add New Blog"}
+        </h2>
 
-export default AddBlog
+        <div>
+          <label htmlFor="image" className="block mb-2">
+            Upload thumbnail
+          </label>
+          <label htmlFor="image">
+            <div
+              className={`h-18 w-30 mt-2 rounded overflow-hidden border-dashed cursor-pointer ${
+                !previewUrl && "border"
+              }`}
+            >
+              <img
+                alt="Upload"
+                className="size-full object-cover"
+                src={previewUrl ? previewUrl : uploadImg}
+              />
+            </div>
+          </label>
+          <input
+            id="image"
+            hidden
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+          {selectedFile && (
+            <p className="text-sm text-gray-600 mt-2">
+              Selected: {selectedFile.name}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="title" className="block mb-2">
+            Blog title
+          </label>
+          <input
+            type="text"
+            id="title"
+            value={blogData.title || ""}
+            required
+            onChange={(e) =>
+              setBlogData({ ...blogData, title: e.target.value })
+            }
+            placeholder="Enter blog title"
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="subTitle" className="block mb-2">Sub title</label>
+          <input
+            type="text"
+            id="subTitle"
+            value={blogData.subTitle || ""}
+            required
+            onChange={(e) =>
+              setBlogData({ ...blogData, subTitle: e.target.value })
+            }
+            placeholder="Enter subtitle (optional)"
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="decription" className="block mb-2">Blog Description</label>
+          <textarea
+            id="decription"
+            value={blogData.description || ""}
+            onChange={(e) =>
+              setBlogData({ ...blogData, description: e.target.value })
+            }
+            placeholder="Enter blog description"
+            className="w-full p-2 border rounded h-32"
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            disabled={isUploading}
+            className={`bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 ${
+              isUploading && "cursor-not-allowed bg-primary/60"
+            }`}
+          >
+            {isUploading
+              ? "Uploading..."
+              : blogToEdit
+              ? "Update Blog"
+              : "Create Blog"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default AddBlog;

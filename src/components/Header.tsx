@@ -18,8 +18,8 @@ interface Button {
 }
 
 const buttons: Button[] = [
-  { type: "dashboard", label: "Dashboard", path: "Dashboard" },
-  { type: "auth", label: "Login", path: "auth" },
+  { type: "dashboard", label: "Dashboard", path: "/Dashboard" },
+  { type: "auth", label: "Login", path: "/auth" },
   { type: "home", label: "Home", path: "/" },
   { type: "logout", label: "logout", path: "/" },
 ];
@@ -43,7 +43,7 @@ const Header = ({ typeOfButton, withBorder }: Props) => {
 
   return (
     <header
-      className={`flex items-center justify-between py-2 h-[70px] border-gray-200 ${
+      className={`flex items-center justify-between py-2 h-17.5 border-border ${
         withBorder && "border-b px-4 sm:px-12"
       }`}
     >
@@ -56,7 +56,7 @@ const Header = ({ typeOfButton, withBorder }: Props) => {
       {headerBtn && (
         <button
           onClick={handleButton}
-          className="flex items-center bg-primary text-primary-foreground text-sm px-4 py-2 rounded-full capitalize"
+          className="flex items-center bg-primary text-primary-foreground text-sm px-4 py-2 rounded-full capitalize hover:scale-102"
         >
           {headerBtn.label}
           <ArrowRight className="ml-1 size-4" />

@@ -12,11 +12,15 @@ const DashboardLayout = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       <Header typeOfButton="logout" withBorder={true} />
-      <div className="flex-1 max-w-[100vw] flex">
+      <div className="flex-1 flex overflow-hidden">
         <SideBar />
-        <Outlet />
+        <div className="size-full bg-primary/3 overflow-hidden overflow-y-auto scroll-hidden">
+          <div className="max-w-3xl sm:m-10">
+            <Outlet />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ interface Props {
 
 const Pagination = ({ setCurrentPage, currentPage, totalPage }: Props) => {
   return (
-    <div className="flex justify-center items-center gap-2 my-10">
+    <div className="flex justify-center items-center gap-2 my-10 [&>button]:hover:scale-103">
       {/* Previous */}
       <button
         disabled={currentPage === 1}
@@ -22,6 +22,7 @@ const Pagination = ({ setCurrentPage, currentPage, totalPage }: Props) => {
       {Array.from({ length: totalPage }, (_, i) => i + 1).map((page) => (
         <button
           key={page}
+          disabled={currentPage === page}
           onClick={() => setCurrentPage(page)}
           className={`px-3 py-1 rounded border ${
             currentPage === page ? "bg-primary text-primary-foreground" : ""
@@ -35,7 +36,7 @@ const Pagination = ({ setCurrentPage, currentPage, totalPage }: Props) => {
       <button
         disabled={currentPage === totalPage}
         onClick={() => setCurrentPage((p) => p + 1)}
-        className={`px-3 py-1 border rounded disabled:opacity-40 ${
+        className={`px-3 py-1 border rounded ${
           currentPage === totalPage && "opacity-40"
         }`}
       >

@@ -55,6 +55,8 @@ const UserForm = () => {
           message,
         })
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,7 +75,7 @@ const UserForm = () => {
         </div>
         <form
           onSubmit={handleSubmit}
-          className="[&>div]:flex [&>div]:flex-col [&>div]:border-b-2 space-y-6 [&>div>input]:p-2 [&>div>input]:outline-none [&>div]:border-gray-300 text-gray-600"
+          className="[&>div]:flex [&>div]:flex-col [&>div]:border-b-2 space-y-6 [&>div>input]:p-2 [&>div>input]:outline-none [&>div]:border-border text-secondary-foreground"
         >
           <div>
             <label htmlFor="email">

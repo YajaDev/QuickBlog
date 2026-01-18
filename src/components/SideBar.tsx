@@ -20,7 +20,7 @@ const SideBar = () => {
             }`
           }
         >
-          <div className="flex gap-3 md:w-60">
+          <div className="flex gap-3 md:w-40 lg:w-60">
             <Icon className="stroke-1" />
             <span className="max-sm:hidden">{name}</span>
           </div>

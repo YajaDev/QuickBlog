@@ -3,10 +3,10 @@ import Notification from "../components/Notification";
 
 const RootLayout = () => {
   return (
-    <>
+    <div className="">
       <Notification />
       <Outlet />
-    </>
+    </div>
   );
 };
 

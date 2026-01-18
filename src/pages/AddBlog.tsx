@@ -17,7 +17,7 @@ const AddBlog = () => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [blogData, setBlogData] = useState<NewBlog>({
     title: "",
     subTitle: "",
@@ -41,16 +41,7 @@ const AddBlog = () => {
   }, [blogToEdit, session?.user.id]);
 
   useEffect(() => {
-    return () => {
-      setBlogData((state) => ({
-        title: "",
-        subTitle: "",
-        description: "",
-        user_id: state.user_id,
-        img_url: null,
-      }));
-      setPreviewUrl(null);
-    };
+    return () => resetBlogState();
   }, [dispatch]);
 
   // Handle file selection
@@ -70,7 +61,7 @@ const AddBlog = () => {
     if (!session) return;
 
     try {
-      setIsUploading(true);
+      setIsLoading(true);
       const updatedBlogData = { ...blogData }; // local blog copy
 
       if (selectedFile) {
@@ -118,9 +109,25 @@ const AddBlog = () => {
       const message = err instanceof Error ? err.message : "Unexpected error";
       dispatch(setNotification({ status: "error", message }));
     } finally {
-      setIsUploading(false);
+      setIsLoading(false);
     }
   };
+
+  const handleCancel = () => {
+    resetBlogState();
+    dispatch(clearBlogToEdit());
+  };
+
+  function resetBlogState() {
+    setBlogData((state) => ({
+      title: "",
+      subTitle: "",
+      description: "",
+      user_id: state.user_id,
+      img_url: null,
+    }));
+    setPreviewUrl(null);
+  }
 
   return (
     <form
@@ -209,20 +216,26 @@ const AddBlog = () => {
         />
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-3">
         <button
           type="submit"
-          disabled={isUploading}
-          className={`bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 ${
-            isUploading && "cursor-not-allowed bg-primary/60"
+          disabled={isLoading}
+          className={`bg-primary text-white px-4 py-2 rounded hover:bg-primary/85 ${
+            isLoading && "cursor-not-allowed bg-primary/60"
           }`}
         >
-          {isUploading
+          {isLoading
             ? "Uploading..."
             : blogToEdit
             ? "Update Blog"
             : "Create Blog"}
         </button>
+
+        {blogToEdit && !isLoading && (
+          <button className="px-4 py-2 rounded hover:bg-primary/20 transition-colors duration-300" onClick={handleCancel}>
+            Cancel
+          </button>
+        )}
       </div>
     </form>
   );

@@ -7,6 +7,7 @@ import { setPages, setTotalPage } from "../reduxStore/blogSlice";
 import { setNotification } from "../reduxStore/notificationSlice";
 import Pagination from "../components/Pagination";
 import { LoaderCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   const blogsPerPage = 6;
@@ -24,9 +25,11 @@ const Home = () => {
   const blogs = currentPageData?.blogs || [];
 
   useEffect(() => {
+    if (currentPageData) return
+
     const fetchBlogs = async () => {
       const from = (currentPage - 1) * blogsPerPage;
-      const to = from + blogsPerPage - 1;
+      const to = from + blogsPerPage;
 
       setIsLoading(true);
 
@@ -44,16 +47,16 @@ const Home = () => {
     };
 
     fetchBlogs();
-  }, [currentPage, dispatch]);
+  }, [currentPage, currentPageData, dispatch]);
 
   return (
-    <div className="mx-8 md:mx-20 xl:mx-32 space-y-6">
+    <div className="mx-8 md:mx-20 xl:mx-32  md:mt-3 space-y-6">
       <Header typeOfButton={typeOfButton} />
-      <div className="text-center my-10 space-y-6">
+      <div className="text-center my-10 pt-5 space-y-6">
         <h1 className="text-3xl sm:text-6xl font-semibold">
           Your own <span className="text-primary">blogging</span> platform.
         </h1>
-        <p className="my-6 sm:my-8 max-w-2xl m-auto max-sm:text-xs text-gray-500">
+        <p className="my-6 sm:my-8 max-w-2xl m-auto max-sm:text-xs text-secondary-foreground">
           This is your space to think out loud, to share what matters, and to
           write without filters. Whether it's one word or a thousand, your story
           starts right here.
@@ -65,28 +68,27 @@ const Home = () => {
         {isLoading && (
           <div className="flex flex-col justify-center items-center h-60">
             <LoaderCircle className="text-primary animate-spin size-10" />
-            <span className="text-gray-600">loading...</span>
+            <span className="text-secondary-foreground">loading...</span>
           </div>
         )}
 
-        {/* Display blogs */}
+        {/* blogs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
           {!isLoading &&
             blogs &&
             blogs.map(({ id, img_url, title, subTitle }) => (
-              <div
-                key={id}
-                className="w-full rounded-lg overflow-hidden shadow hover:scale-102 hover:shadow-primary/25 duration-300 cursor-pointer"
-              >
-                {img_url && (
-                  <img src={img_url} alt={title} className="aspect-video" />
-                )}
+              <Link key={id} to={`blog/${id}`}>
+                <div className="size-full rounded-lg overflow-hidden shadow hover:scale-102 hover:shadow-primary/25 duration-300 cursor-pointer">
+                  {img_url && (
+                    <img src={img_url} alt={title} className="aspect-video" />
+                  )}
 
-                <div className="pl-5">
-                  <h5 className="mb-2 font-medium text-gray-900">{title}</h5>
-                  <p className="mb-3 text-xs text-gray-600">{subTitle}</p>
+                  <div className="pl-5">
+                    <h5 className="mb-2 font-medium">{title}</h5>
+                    <p className="mb-3 text-xs text-secondary-foreground">{subTitle}</p>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
         </div>
       </div>

@@ -43,6 +43,18 @@ export const getBlogsByUser = async (userId: string) => {
   return data;
 };
 
+export const getBlogById = async (id: string) => {
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+
 export const addBlog = async (blog: NewBlog) => {
   const { data, error } = await supabase.from("blogs").insert(blog).single();
 

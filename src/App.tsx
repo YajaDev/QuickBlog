@@ -17,6 +17,7 @@ import BlogList from "./pages/BlogList";
 import AddBlog from "./pages/AddBlog";
 import RootLayout from "./layouts/RootLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
+import BlogDetail from "./pages/BlogDetail";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -41,11 +42,12 @@ function App() {
   }, [dispatch]);
 
   const router = createBrowserRouter(
-    createRoutesFromElements(
+    createRoutesFromElements( 
       <>
         <Route path="/" element={<RootLayout />}>
           <Route index element={<Home />} />
           <Route path="auth" element={<UserForm />} />
+          <Route path="blog/:id" element={<BlogDetail />} />
 
           {/* Protected Route */}
           <Route path="dashboard" element={<DashboardLayout />}>

@@ -21,15 +21,16 @@ const Home = () => {
 
   const typeOfButton: TypeOfButton = session ? "dashboard" : "auth";
 
-  const currentPageData = pages[currentPage];
+  const currentPageData = pages[currentPage - 1];
   const blogs = currentPageData?.blogs || [];
 
   useEffect(() => {
-    if (currentPageData) return
+    if (currentPageData) return;
 
     const fetchBlogs = async () => {
       const from = (currentPage - 1) * blogsPerPage;
       const to = from + blogsPerPage;
+      console.log("runn");
 
       setIsLoading(true);
 
@@ -85,7 +86,9 @@ const Home = () => {
 
                   <div className="pl-5">
                     <h5 className="mb-2 font-medium">{title}</h5>
-                    <p className="mb-3 text-xs text-secondary-foreground">{subTitle}</p>
+                    <p className="mb-3 text-xs text-secondary-foreground">
+                      {subTitle}
+                    </p>
                   </div>
                 </div>
               </Link>

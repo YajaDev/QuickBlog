@@ -7,7 +7,7 @@ import {
   type Blog,
 } from "../services/blogServices";
 import type { RootState } from "../reduxStore/store";
-import { setBlogToEdit } from "../reduxStore/blogSlice";
+import { clearPages, setBlogToEdit } from "../reduxStore/blogSlice";
 import { useNavigate } from "react-router-dom";
 import { deleteBlogImage } from "../services/imageUploadService";
 import { setNotification } from "../reduxStore/notificationSlice";
@@ -41,7 +41,7 @@ export default function BlogListPage() {
 
   const handleDelete = async (blog: Blog) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this blog?"
+      "Are you sure you want to delete this blog?",
     );
 
     if (!confirmDelete) return;
@@ -53,11 +53,13 @@ export default function BlogListPage() {
       await deleteBlog(blog.id);
       setBlogs((prev) => prev?.filter((b) => b.id !== blog.id) || null);
 
+      dispatch(clearPages());
+
       dispatch(
         setNotification({
           status: "success",
           message: "Blog deleted successfully",
-        })
+        }),
       );
     } catch (err) {
       const message =
@@ -69,7 +71,9 @@ export default function BlogListPage() {
 
   return (
     <>
-      <h5 className="text-foreground/85 max-sm:bg-background max-sm:p-3 font-medium pb-4">All Blogs</h5>
+      <h5 className="text-foreground/85 max-sm:bg-background max-sm:p-3 font-medium pb-4">
+        All Blogs
+      </h5>
 
       <div className="text-sm bg-background shadow rounded">
         <table className="w-full tex p-4 md:p-10 text-secondary-foreground">

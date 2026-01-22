@@ -29,7 +29,7 @@ const Home = () => {
 
     const fetchBlogs = async () => {
       const from = (currentPage - 1) * blogsPerPage;
-      const to = from + blogsPerPage;
+      const to = from + blogsPerPage - 1;
       console.log("runn");
 
       setIsLoading(true);

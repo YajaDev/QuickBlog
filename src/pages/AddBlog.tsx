@@ -8,7 +8,7 @@ import {
   uploadBlogImage,
 } from "../services/imageUploadService";
 import { setNotification } from "../reduxStore/notificationSlice";
-import { clearBlogToEdit } from "../reduxStore/blogSlice";
+import { clearBlogToEdit, clearPages } from "../reduxStore/blogSlice";
 
 const AddBlog = () => {
   const { session } = useSelector((state: RootState) => state.auth);
@@ -82,15 +82,16 @@ const AddBlog = () => {
           setNotification({
             status: "success",
             message: "Blog updated successfully!",
-          })
+          }),
         );
       } else {
         await addBlog(updatedBlogData);
+        dispatch(clearPages());
         dispatch(
           setNotification({
             status: "success",
             message: "Blog created successfully!",
-          })
+          }),
         );
       }
 
@@ -227,12 +228,15 @@ const AddBlog = () => {
           {isLoading
             ? "Uploading..."
             : blogToEdit
-            ? "Update Blog"
-            : "Create Blog"}
+              ? "Update Blog"
+              : "Create Blog"}
         </button>
 
         {blogToEdit && !isLoading && (
-          <button className="px-4 py-2 rounded hover:bg-primary/20 transition-colors duration-300" onClick={handleCancel}>
+          <button
+            className="px-4 py-2 rounded hover:bg-primary/20 transition-colors duration-300"
+            onClick={handleCancel}
+          >
             Cancel
           </button>
         )}

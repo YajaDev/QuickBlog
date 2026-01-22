@@ -31,9 +31,17 @@ const blogSlice = createSlice({
     clearBlogToEdit(state) {
       state.blogToEdit = null;
     },
+    clearPages(state) {
+      state.pages = [];
+    },
   },
 });
 
-export const { setPages, setBlogToEdit, clearBlogToEdit, setTotalPage } =
-  blogSlice.actions;
+export const {
+  setPages,
+  setBlogToEdit,
+  clearBlogToEdit,
+  setTotalPage,
+  clearPages,
+} = blogSlice.actions;
 export default blogSlice.reducer;

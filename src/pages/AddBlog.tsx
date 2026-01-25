@@ -9,11 +9,14 @@ import {
 } from "../services/imageUploadService";
 import { setNotification } from "../reduxStore/notificationSlice";
 import { clearBlogToEdit, clearPages } from "../reduxStore/blogSlice";
+import { useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
 
 const AddBlog = () => {
   const { session } = useSelector((state: RootState) => state.auth);
   const { blogToEdit } = useSelector((state: RootState) => state.blog);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -84,6 +87,8 @@ const AddBlog = () => {
             message: "Blog updated successfully!",
           }),
         );
+
+        navigate("/dashboard");
       } else {
         await addBlog(updatedBlogData);
         dispatch(clearPages());
@@ -117,6 +122,7 @@ const AddBlog = () => {
   const handleCancel = () => {
     resetBlogState();
     dispatch(clearBlogToEdit());
+    navigate("/dashboard");
   };
 
   function resetBlogState() {
@@ -143,19 +149,35 @@ const AddBlog = () => {
         <label htmlFor="image" className="block mb-2">
           Upload thumbnail
         </label>
-        <label htmlFor="image">
-          <div
-            className={`h-18 w-30 mt-2 rounded overflow-hidden border-dashed cursor-pointer ${
-              !previewUrl && "border"
-            }`}
-          >
-            <img
-              alt="Upload"
-              className="size-full object-cover"
-              src={previewUrl ? previewUrl : uploadImg}
-            />
-          </div>
-        </label>
+
+        <div className="relative">
+          <label htmlFor="image">
+            <div
+              className={`h-18 w-30 mt-2 rounded overflow-hidden border-dashed cursor-pointer ${
+                !previewUrl && "border"
+              }`}
+            >
+              <img
+                alt="Upload"
+                className="size-full object-cover"
+                src={previewUrl ? previewUrl : uploadImg}
+              />
+            </div>
+          </label>
+
+          {previewUrl && (
+            <button
+              type="button"
+              onClick={() => {
+                setPreviewUrl(null);
+                setSelectedFile(null);
+              }}
+              className="absolute -top-1.5 left-32 p-1"
+            >
+              <X className="size-4 stroke-3 text-secondary-foreground bg-primary/10" />
+            </button>
+          )}
+        </div>
         <input
           id="image"
           hidden
@@ -234,6 +256,7 @@ const AddBlog = () => {
 
         {blogToEdit && !isLoading && (
           <button
+            type="button"
             className="px-4 py-2 rounded hover:bg-primary/20 transition-colors duration-300"
             onClick={handleCancel}
           >

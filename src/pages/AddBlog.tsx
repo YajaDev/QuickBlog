@@ -3,14 +3,12 @@ import type { RootState } from "../reduxStore/store";
 import { useEffect, useState } from "react";
 import { addBlog, editBlog, type NewBlog } from "../services/blogServices";
 import uploadImg from "../assets/upload-img.svg";
-import {
-  deleteBlogImage,
-  uploadBlogImage,
-} from "../services/imageUploadService";
+import { deleteImage, uploadImage } from "../services/imageUploadService";
 import { setNotification } from "../reduxStore/notificationSlice";
 import { clearBlogToEdit, clearPages } from "../reduxStore/blogSlice";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import { handleImageFileChange } from "../utils";
 
 const AddBlog = () => {
   const { session } = useSelector((state: RootState) => state.auth);
@@ -18,7 +16,9 @@ const AddBlog = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null | "idle">(
+    "idle",
+  );
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [blogData, setBlogData] = useState<NewBlog>({
@@ -38,26 +38,18 @@ const AddBlog = () => {
         user_id: session?.user.id || "",
         img_url: blogToEdit.img_url,
       });
-
+      setSelectedFile("idle");
       setPreviewUrl(blogToEdit.img_url); //Set preview URL to existing image
     }
   }, [blogToEdit, session?.user.id]);
 
   useEffect(() => {
-    return () => resetBlogState();
+    return () => {
+      resetBlogState();
+      setSelectedFile("idle");
+      dispatch(clearBlogToEdit());
+    };
   }, [dispatch]);
-
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setSelectedFile(file);
-
-    // Create preview URL
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -67,11 +59,21 @@ const AddBlog = () => {
       setIsLoading(true);
       const updatedBlogData = { ...blogData }; // local blog copy
 
-      if (selectedFile) {
-        // Delete prev image on bucket
-        if (blogToEdit?.img_url) deleteBlogImage(blogToEdit.img_url);
+      if (selectedFile === null && blogToEdit?.img_url) {
+        await deleteImage({ type: "blog", imageUrl: blogToEdit.img_url }); // Delete prev image on bucket
+        updatedBlogData.img_url = null; // Update blogData
+      }
 
-        const imgUrl = await uploadBlogImage(selectedFile, session.user.id); // Upload image
+      if (selectedFile instanceof File) {
+        // If there's old image, delete it
+        if (blogToEdit?.img_url)
+          await deleteImage({ type: "blog", imageUrl: blogToEdit.img_url });
+
+        const imgUrl = await uploadImage({
+          type: "blog",
+          file: selectedFile,
+          userId: session.user.id,
+        }); // Upload image
         updatedBlogData.img_url = imgUrl; // Update blogData
       }
 
@@ -91,7 +93,6 @@ const AddBlog = () => {
         navigate("/dashboard");
       } else {
         await addBlog(updatedBlogData);
-        dispatch(clearPages());
         dispatch(
           setNotification({
             status: "success",
@@ -101,16 +102,10 @@ const AddBlog = () => {
       }
 
       // Reset form
-      setBlogData({
-        title: "",
-        subTitle: "",
-        description: "",
-        user_id: session.user.id,
-        img_url: null,
-      });
-      setSelectedFile(null);
-      setPreviewUrl(null);
+      setSelectedFile("idle");
+      resetBlogState();
       dispatch(clearBlogToEdit());
+      dispatch(clearPages());
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unexpected error";
       dispatch(setNotification({ status: "error", message }));
@@ -183,9 +178,11 @@ const AddBlog = () => {
           hidden
           type="file"
           accept="image/*"
-          onChange={handleFileChange}
+          onChange={(e) =>
+            handleImageFileChange(e, setSelectedFile, setPreviewUrl)
+          }
         />
-        {selectedFile && (
+        {selectedFile instanceof File && (
           <p className="text-sm text-gray-600 mt-2">
             Selected: {selectedFile.name}
           </p>

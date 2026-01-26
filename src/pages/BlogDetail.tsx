@@ -6,6 +6,8 @@ import { setNotification } from "../reduxStore/notificationSlice";
 import { getBlogById, type Blog } from "../services/blogServices";
 import { useParams, useNavigate } from "react-router-dom";
 import { LoaderCircle } from "lucide-react";
+import CommentForm from "../components/CommentForm";
+import CommentsContainer from "../components/CommentsContainer";
 
 const BlogDetail = () => {
   const { session } = useSelector((state: RootState) => state.auth);
@@ -79,6 +81,10 @@ const BlogDetail = () => {
               {blog.description}
             </p>
           </div>
+
+          <CommentsContainer blogId={blog.id} />
+
+          <CommentForm blogId={blog.id} />
 
           {/* Back Button */}
           <div className="mt-8">

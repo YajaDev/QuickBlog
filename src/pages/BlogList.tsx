@@ -9,7 +9,7 @@ import {
 import type { RootState } from "../reduxStore/store";
 import { clearPages, setBlogToEdit } from "../reduxStore/blogSlice";
 import { useNavigate } from "react-router-dom";
-import { deleteBlogImage } from "../services/imageUploadService";
+import { deleteImage } from "../services/imageUploadService";
 import { setNotification } from "../reduxStore/notificationSlice";
 
 export default function BlogListPage() {
@@ -48,7 +48,7 @@ export default function BlogListPage() {
 
     try {
       if (blog.img_url) {
-        await deleteBlogImage(blog.img_url);
+        await deleteImage({ type: "blog", imageUrl: blog.img_url });
       }
       await deleteBlog(blog.id);
       setBlogs((prev) => prev?.filter((b) => b.id !== blog.id) || null);

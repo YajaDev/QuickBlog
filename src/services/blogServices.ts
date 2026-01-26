@@ -15,7 +15,7 @@ export type NewBlog = Omit<Blog, "id" | "created_at">;
 export const getBlogs = async (
   from: number,
   to: number,
-  blogsPerPage: number
+  blogsPerPage: number,
 ) => {
   const { data, count, error } = await supabase
     .from("blogs")
@@ -54,13 +54,10 @@ export const getBlogById = async (id: string) => {
   return data;
 };
 
-
 export const addBlog = async (blog: NewBlog) => {
-  const { data, error } = await supabase.from("blogs").insert(blog).single();
+  const { error } = await supabase.from("blogs").insert(blog).single();
 
   if (error) throw error;
-
-  return data;
 };
 
 export const editBlog = async ({
@@ -70,16 +67,13 @@ export const editBlog = async ({
   blogId: string;
   updatedBlog: Partial<Blog>;
 }) => {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("blogs")
     .update(updatedBlog)
     .eq("id", blogId)
-    .select()
     .single();
 
   if (error) throw error;
-
-  return data;
 };
 
 export const deleteBlog = async (blogId: string) => {
